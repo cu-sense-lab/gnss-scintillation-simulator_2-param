@@ -1,13 +1,13 @@
 function       eph=ExtractRINEXeph(userInput)
 % USAGE:  Extract RINEX ephemeris file from website 
-% ftp://cddis.gsfc.nasa.gov/gnss/data/daily/YYYY/DDD/YYn/brdcDDD0.YYn.Z
+% https://cddis.nasa.gov/archive/gnss/data/daily/YYYY/DDD/YYn/brdcDDD0.YYn.Z
 % and store the parameters in the eph struct:
 year = userInput.dateTime(1);
 day_of_year = datenum(userInput.dateTime(1),...
     userInput.dateTime(2),userInput.dateTime(3))-datenum(year-1,12,31);
 PRN = userInput.PRN;
 
-datadir = 'ftp://cddis.gsfc.nasa.gov/gnss/data/daily/';
+datadir = 'https://cddis.nasa.gov/archive/gnss/data/daily/';
 YYYY = num2str(year);
 DDD = num2str(day_of_year);
 if length(DDD)== 1
@@ -16,10 +16,16 @@ elseif length(DDD) == 2
     DDD = ['0',DDD];
 end
 YY = YYYY(3:4);
-RinexFile = [datadir,YYYY,'/',DDD,'/',YY,'n/brdc',DDD,'0.',YY,'n.Z'];
+filename = ['brdc',DDD,'0.',YY,'n.Z'];
+RinexFile = [datadir,YYYY,'/',DDD,'/',YY,'n/',filename];
 [~,ephfile] = fileparts(RinexFile);
 if ~exist(ephfile,'file')
-    if ~exist([ephfile,'.Z'],'file') 
+    if ~exist([ephfile,'.Z'],'file')
+        username = input('Write the username: ', 's');
+        password = input('Write the password: ', 's');
+
+        system(['wget --auth-no-challenge --user=', username ' --password=', password, ' -O ', filename,' ', RinexFile])
+        
         gunzip(RinexFile,pwd)
     end
     fprintf('Unzipping ephemeris file %s \n',ephfile)
