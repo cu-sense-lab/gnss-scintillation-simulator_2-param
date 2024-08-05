@@ -10,11 +10,8 @@ PRN = userInput.PRN;
 datadir = 'https://cddis.nasa.gov/archive/gnss/data/daily/';
 YYYY = num2str(year);
 DDD = num2str(day_of_year);
-if length(DDD)== 1
-    DDD = ['0','0',DDD];
-elseif length(DDD) == 2
-    DDD = ['0',DDD];
-end
+DDD = sprintf('%03s', DDD); % the format specifier %03s pads DDD with leading zeros to ensure it is at least 3 characters long
+
 YY = YYYY(3:4);
 filename = ['brdc',DDD,'0.',YY,'n.Z'];
 RinexFile = [datadir,YYYY,'/',DDD,'/',YY,'n/',filename];
