@@ -7,7 +7,6 @@ day_of_year = datenum(userInput.dateTime(1),...
     userInput.dateTime(2),userInput.dateTime(3))-datenum(year-1,12,31);
 PRN = userInput.PRN;
 
-datadir = 'https://cddis.nasa.gov/archive/gnss/data/daily/';
 YYYY = num2str(year);
 DDD = num2str(day_of_year);
 if length(DDD)== 1
@@ -17,7 +16,7 @@ elseif length(DDD) == 2
 end
 YY = YYYY(3:4);
 ephfile = ['brdc',DDD,'0.',YY,'n'];
-RinexFileURL = [datadir,YYYY,'/',DDD,'/',YY,'n/',ephfile,'.Z'];
+RinexFileURL = ['https://cddis.nasa.gov/archive/gnss/data/daily/',YYYY,'/',DDD,'/',YY,'n/',ephfile,'.Z'];
 
 if ~exist(ephfile,'file')
     if ~exist([ephfile,'.Z'],'file')
@@ -35,7 +34,7 @@ if ~exist(ephfile,'file')
     system(['uncompress ',ephfile,'.Z']);
     if status ~= 0
         error(['Some Matlab versions do not recognize .zip compression.' ...
-               ' If error occurred, please go to the folder and manually uncompress the .Z ephemeris file.'])
+               ' If this error occurred, please go to the folder and manually uncompress the .Z ephemeris file.'])
     end
 end
 fprintf('Using ephemeris file %s \n',ephfile)
