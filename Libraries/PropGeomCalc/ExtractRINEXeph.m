@@ -16,27 +16,29 @@ elseif length(DDD) == 2
     DDD = ['0',DDD];
 end
 YY = YYYY(3:4);
-filename = ['brdc',DDD,'0.',YY,'n.Z'];
-RinexFile = [datadir,YYYY,'/',DDD,'/',YY,'n/',filename];
-[~,ephfile] = fileparts(RinexFile);
+ephfile = ['brdc',DDD,'0.',YY,'n'];
+RinexFileURL = [datadir,YYYY,'/',DDD,'/',YY,'n/',ephfile,'.Z'];
+
 if ~exist(ephfile,'file')
     if ~exist([ephfile,'.Z'],'file')
         username = input('Write the username: ', 's');
         password = input('Write the password: ', 's');
 
-        system(['wget --auth-no-challenge --user=', username ' --password=', password, ' -O ', filename,' ', RinexFile])
-        
-        gunzip(RinexFile,pwd)
+        status = system(['wget --auth-no-challenge --user=', username ' --password=', password, ' -O ', ephfile, '.Z ', RinexFileURL]);
+        if status ~= 0
+            error(['It was not possible to download the file automatically. It occurred because either `wget`' ...
+                   'is not a recognized command on your system, the username/password is incorrect, or the URL' ...
+                   'link is broken. Please download this file manually and rerun this script.']);
+        end
     end
     fprintf('Unzipping ephemeris file %s \n',ephfile)
-    fprintf(['Some Matlab versions do not recognize .zip compression.' ...
-    ' If error occurred, please go to the folder and manually uncompress the .Z ephemeris file.']);
     system(['uncompress ',ephfile,'.Z']);
-    fprintf('Using ephemeris file %s \n',ephfile)
-    %Matlab R2015a does not recognize .zip compression => manual uncompress nessary!!
-else
-    fprintf('Using ephemeris file %s \n',ephfile)
+    if status ~= 0
+        error(['Some Matlab versions do not recognize .zip compression.' ...
+               ' If error occurred, please go to the folder and manually uncompress the .Z ephemeris file.'])
+    end
 end
+fprintf('Using ephemeris file %s \n',ephfile)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [eph,~] =rinexe(ephfile); %Extract 21XN ephemeris files
