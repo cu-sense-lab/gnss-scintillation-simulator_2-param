@@ -38,8 +38,6 @@ else
     rhoOveffk =nan;  
 end
 
-fDop=(-nfft/2:nfft/2-1)/(nfft*Dt); dfDop=diff(fDop(1:2));
-
 U = zeros(1,userInput.frequencyNo);  %% Joy
 mu0 = zeros(1,userInput.frequencyNo);  %% Joy
 U(1) = U_L1_ori;
