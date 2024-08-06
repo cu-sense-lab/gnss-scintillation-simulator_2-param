@@ -15,7 +15,7 @@ function [Scin_psi, Scin_amp, Scin_phi] = RunGenScintFieldRealization(userInput,
 
 %%%%%Fixed Parameters%%%%%%%%%%%%%%%%%%%%%
 c = 299792458;                    % Speed of light (vacuum)
-Dt = 0.01;                        % Sampling time (100 ms)
+Dt = 0.01;                        % Sampling time (10 ms or 100 Hz)
 nsamp_seg = userInput.length/Dt;  % Samples per segment
 nfft=nicefftnum(nsamp_seg);       % Number of FFT samples
 
