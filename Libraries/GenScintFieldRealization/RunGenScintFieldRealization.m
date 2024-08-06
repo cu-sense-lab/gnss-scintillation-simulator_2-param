@@ -14,8 +14,10 @@ function [Scin_psi, Scin_amp, Scin_phi] = RunGenScintFieldRealization(userInput,
 %Libraries:   GenScintFieldRealization Utilities 
 
 %%%%%Fixed Parameters%%%%%%%%%%%%%%%%%%%%%
-c = 299792458;             %Speed of light (vacuum)
-Dt = 0.01;
+c = 299792458;                    % Speed of light (vacuum)
+Dt = 0.01;                        % Sampling time (100 ms)
+nsamp_seg = userInput.length/Dt;  % Samples per segment
+nfft=nicefftnum(nsamp_seg);       % Number of FFT samples
 
 %frequencies
 freqGPS(1)=154*10.23e6;  freqID{1}='L1';
@@ -35,9 +37,7 @@ else
     rngp_eff   =nan;
     rhoOveffk =nan;  
 end
-nsamp_seg=userInput.length/Dt;                    %Samples per segment
-%Adjust to nicefftnum
-nfft=nicefftnum(nsamp_seg);
+
 fDop=(-nfft/2:nfft/2-1)/(nfft*Dt); dfDop=diff(fDop(1:2));
 
 U = zeros(1,userInput.frequencyNo);  %% Joy
@@ -45,30 +45,30 @@ mu0 = zeros(1,userInput.frequencyNo);  %% Joy
 U(1) = U_L1_ori;
 [p1,p2,mu0(1)]=GPS_ScintModelParams(U(1));
 Scin_psi=zeros(userInput.frequencyNo,nfft)*(1+1i);
-Scin_amp=zeros(userInput.frequencyNo,nfft);
-Scin_phi=zeros(userInput.frequencyNo,nfft);
+Scin_amp=zeros(userInput.frequencyNo,nsamp_seg);
+Scin_phi=zeros(userInput.frequencyNo,nsamp_seg);
 S4=zeros(1,userInput.frequencyNo);
 rhoOveffk=mean(rhoOveffk);  %% Joy
-t_sec = [0:Dt:userInput.length-Dt];
+t_sec = 0:Dt:userInput.length-Dt;
 % Use the same seed for different dynamics %%% Joy
 SEED=rng;  %One white noise realization for all frequencies
 
-rhoFOveff=zeros(1,userInput.frequencyNo);  %% Joy
+rhoFOveff = zeros(1,userInput.frequencyNo);  %% Joy
 
 for nfreq=1:userInput.frequencyNo
     if nfreq==1
         if(sum(userInput.RXVel)~=0)
-            rhoFOveff(1)=rhoOveffk/sqrt(2*pi*freqGPS(nfreq)/c);
+            rhoFOveff(1) = rhoOveffk/sqrt(2*pi*freqGPS(nfreq)/c);
         else
-            rhoFOveff(1)=rhoFVeff_L1_ori;
+            rhoFOveff(1) = rhoFVeff_L1_ori;
         end
         [Scin_psi(1,:),~,fracMom]=GenScintFieldRealization(U(1),p1,p2,mu0(1),rhoFOveff(1),Dt,nfft,SEED);  %% Joy
         S4(1)=sqrt(fracMom(2)-1);
         [~, tau0(1)] = ParaMappingInv(U(1),rhoFOveff(1));
     else
         [X0]=FreqExtrapolate(U(1),p1,mu0(1),p2,rhoFOveff(1),freqGPS(1),freqGPS(nfreq));  %% Joy
-        U(nfreq)=X0(1); mu0(nfreq)=X0(3); rhoFOveff(nfreq)=X0(5);  %% Joy
-        [Scin_psi(nfreq,:),~,fracMom]=GenScintFieldRealization(U(nfreq),p1,p2,mu0(nfreq),rhoFOveff(nfreq),Dt,nfft,SEED);
+        U(nfreq) = X0(1); mu0(nfreq)=X0(3); rhoFOveff(nfreq)=X0(5);  %% Joy
+        [Scin_psi(nfreq,:),~,fracMom] = GenScintFieldRealization(U(nfreq),p1,p2,mu0(nfreq),rhoFOveff(nfreq),Dt,nfft,SEED);
         S4(nfreq)=sqrt(fracMom(2)-1);
         [~, tau0(nfreq)] = ParaMappingInv(U(nfreq),rhoFOveff(nfreq));
     end
@@ -81,21 +81,21 @@ if userInput.plotSign==1
         hx = figure;
         end
         figure(hx)
-        Scin_amp=abs(Scin_psi(nfreq,1:nsamp_seg));
-        Scin_phi=unwrap(atan2(imag(Scin_psi(nfreq,1:nsamp_seg)),real(Scin_psi(nfreq,1:nsamp_seg))));
-        ax(1)=subplot(userInput.frequencyNo,2,nfreq*2-1);
-        plot(t_sec/60,dB10(Scin_amp.^2),'r')
+        Scin_amp(nfreq, :) = abs(Scin_psi(nfreq, 1:nsamp_seg));
+        Scin_phi(nfreq, :) = unwrap(atan2(imag(Scin_psi(nfreq,1:nsamp_seg)),real(Scin_psi(nfreq,1:nsamp_seg))));
+        ax(1) = subplot(userInput.frequencyNo,2,nfreq*2-1);
+        plot(t_sec/60,dB10(Scin_amp(nfreq, :).^2),'r')
         grid on
         ylabel('I-dB')
         title(ID)
         axis([min(t_sec/60) max(t_sec/60) -45 10])
         text(4,-40,['S4=',num2str(S4(nfreq))])
         ax(2)=subplot(userInput.frequencyNo,2,nfreq*2);
-        plot(t_sec/60,Scin_phi,'r')
+        plot(t_sec/60,Scin_phi(nfreq, :),'r')
         grid on
         ylabel('\phi-rad')
         xlabel('t-min')
-        axis([min(t_sec/60) max(t_sec/60)  min(floor(Scin_phi))  max(ceil(Scin_phi))])
+        axis([min(t_sec/60) max(t_sec/60)  min(floor(Scin_phi(nfreq, :)))  max(ceil(Scin_phi(nfreq, :)))])
         linkaxes(ax,'x')
         bold_fig
     end

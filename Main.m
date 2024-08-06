@@ -24,7 +24,7 @@ userInput.RXPos = [0.3876 1.9942 59.6780]';
 userInput.RXVel = [100 0 0]';
 
 % Please specify satellite PRN (0~32)
-userInput.PRN = 1;
+userInput.PRN = 12;
 
 % Plotting figures of the simulated propagation geometry and scintillation intensity and phase? yes-1/no-0
 userInput.plotSign = 1;
