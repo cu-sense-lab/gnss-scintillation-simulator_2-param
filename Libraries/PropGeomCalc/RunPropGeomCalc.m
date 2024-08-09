@@ -60,7 +60,7 @@ rngp_eff   = rngp.*(sat_rngeG-rngp)./sat_rngeG;
 veff_ori = sqrt(rngp_eff)./(rhoFOVeff_ori*sqrt(2*pi*freqL1/c));
 nn=0;
 
-drift_East_range = [0:25:200];
+drift_East_range = 0:25:200;
 
 for drift_East = drift_East_range %Establish the baseline of veff versus drift_East 
     nn = nn+1;
@@ -69,7 +69,7 @@ for drift_East = drift_East_range %Establish the baseline of veff versus drift_E
 end
 drift_East_est = mean(interp1(veff_range,drift_East_range,veff_ori,'spline')); %Interpolation
 if(drift_East_est>250||drift_East_est<=0||mean(satGEOM.sat_elev)<=15*pi/180)
-    error('bad geometry for Vdrift estimation and dynamic platform scintillation simulation');
+    error('RunPropGeomCalc:BadGeometry', 'bad geometry for Vdrift estimation and dynamic platform scintillation simulation');
 end
 %% Obtain the geometry based on the user defined dynamic platform
 satGEOM = PropGeomCalc(GPSWeeknSec,UTCDateTime,eph,origin_llh,h_intercept,userInput.RXVel,[0 drift_East_est 0]');
@@ -87,7 +87,7 @@ if (userInput.plotSign)
     text(xs(1)+0.03, ys(1),sprintf('%d',PRN));
     
     axis off
-    title({['Sky View of GNSS SV Track '];...
+    title({['Sky View of GNSS SV Track ', userInput.PRN];...
         [num2str(fix(userInput.length/60)) ' min from UTC ' num2str(UTCDateTime(1)) '-' num2str(UTCDateTime(2)) '-' num2str(UTCDateTime(3))...
         ' ' num2str(UTCDateTime(4),'%02d') ':' num2str(UTCDateTime(5),'%02d') ':' num2str(UTCDateTime(6),'%02d')]});
     

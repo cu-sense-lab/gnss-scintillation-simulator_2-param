@@ -24,7 +24,7 @@ userInput.RXPos = [0.3876 1.9942 59.6780]';
 userInput.RXVel = [100 0 0]';
 
 % Please specify satellite PRN (0~32)
-userInput.PRN = 1;
+userInput.PRN = 12;
 
 % Plotting figures of the simulated propagation geometry and scintillation intensity and phase? yes-1/no-0
 userInput.plotSign = 1;
@@ -41,7 +41,23 @@ userInput.tau0 = 0.7; % Signal intensity decorrelation time in sec.
 
 %% Calculate the propagation geometry**************************************
 if(sum(userInput.RXVel)~=0)
-    satGEOM = RunPropGeomCalc(userInput,rhoFVeff_mapped);
+    while true
+        try
+            satGEOM = RunPropGeomCalc(userInput,rhoFVeff_mapped);
+            break;
+        catch ME
+            if userInput.PRN == 32
+                rethrow(ME);
+            else
+                userInput.PRN = userInput.PRN + 1;
+                clc;
+                warning(['The provided receiver position, UTC time, and satellite PRN ' ...
+                         'lead to a bad geometry for Vdrift estimation.\n\n' ...
+                         'The input PRN has been changed to %s and the the propagation ' ...
+                         'geometry is computed again.'], num2str(userInput.PRN));
+            end
+        end
+    end
 end
 
 %% Generate scintillation signal field realizations
