@@ -10,21 +10,21 @@ function        satGEOM_struct=PropGeomCalc(GPSTime,UT_time,eph,origin_llh,h_int
 %
 %OUTPUTS:
 %   *************ecf Coordinates**********************************************************
-%   xsat_ecf, vsat_ecf = satellite state vector in ecf coordinates from spg4         (3XN)
+%   xsat_ecf, vsat_ecf = satellite state vector in ecf coordinates from spg4 (3XN)
 %   ************GPS Coordinates***********************************************************
-%   sat_llh            = satellite geodetic coordinates                                                   (3XN)
+%   sat_llh            = satellite geodetic coordinates (3XN)
 %   ************Station TCS coordinates***************************************************
 %   sat_tcs,  vsat_tcs = satellite state vector in receiver tcs system at origin_llh (3XN)
-%   sat_rng,  sat_rdot = satellite rang & range rate (=> sat_tcs)                            (3XN)
-%   sat_elev, sat_phi  = satellite elevation & true bearing                                       (NX1)
+%   sat_rng,  sat_rdot = satellite rang & range rate (=> sat_tcs) (3XN)
+%   sat_elev, sat_phi  = satellite elevation & true bearing (NX1)
 %   *************Propagation Reference Coordinates at penetration point*******************
-%   xyzp               = propagation coordinates with origin at h_intercept                 (3xN)
-%   thetap, phip       = polar angles wrt x  (phip  cw from y-axis                              (NX1)
+%   xyzp               = propagation coordinates with origin at h_intercept (3xN)
+%   thetap, phip       = polar angles wrt x  (phip  cw from y-axis (NX1)
 %                                          theta cw from x-axis
-%   rngp               = range from receiver to intercept point                                      (Nx1)
-%   uk_xyzp         = unit vector pointing along propagation direction                    (3XN)
-%   s                     = unit magnetic field vector xp,yp,zp system                              (3xN)
-%   thetaB,psiB   = polar angles wrt xp                                                                    (Nx1)
+%   rngp               = range from receiver to intercept point (Nx1)
+%   uk_xyzp         = unit vector pointing along propagation direction (3XN)
+%   s                     = unit magnetic field vector xp,yp,zp system (3xN)
+%   thetaB,psiB   = polar angles wrt xp (Nx1)
 %   vp                 = penetration point velocity <= satellite motion 
 %   vk                 = apparent velocity in measurement plane
 %   sat_utsec          = time (sec)
@@ -50,7 +50,7 @@ vsat_ecf=zeros(3,nsamps);
 for nsamp=1:nsamps            %Calculate ecf position & velocity    
     [ xsat_ecf(:,nsamp), vsat_ecf(:,nsamp)]=satposvel(GPSTime(2,nsamp),eph);  % changed by Joy
 end
-sat_llh=ecf2llhT(xsat_ecf);                %ECF to geodetic (llh)  
+sat_llh=ecf2llhT(xsat_ecf);         %ECF to geodetic (llh)  
 sat_tcs=llh2tcsT(sat_llh,origin_llh);  %llh to tcs at origin_llh
 
 %%%%%%%%%%Truncate to visible segment containing UTC_time%%%%%%%%%%%%%%%%%% 

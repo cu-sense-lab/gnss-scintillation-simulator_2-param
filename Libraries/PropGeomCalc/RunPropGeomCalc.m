@@ -39,7 +39,7 @@ eph = ExtractRINEXeph(userInput);
 GPSTime_sec_end = GPStime_sec_start + userInput.length-1;
 
 GPSWeeknSec(1,:) = ones(1,userInput.length)*GPSweek;
-GPSWeeknSec(2,:) = [GPStime_sec_start:GPSTime_sec_end];
+GPSWeeknSec(2,:) = GPStime_sec_start:GPSTime_sec_end;
 
 indexTemp = find(GPSWeeknSec(2,:)>=604800);
 GPSWeeknSec(1,indexTemp) = GPSWeeknSec(1,indexTemp)+1;
