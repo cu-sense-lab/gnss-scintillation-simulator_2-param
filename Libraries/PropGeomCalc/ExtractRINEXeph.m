@@ -7,33 +7,34 @@ day_of_year = datenum(userInput.dateTime(1),...
     userInput.dateTime(2),userInput.dateTime(3))-datenum(year-1,12,31);
 PRN = userInput.PRN;
 
-datadir = 'https://cddis.nasa.gov/archive/gnss/data/daily/';
 YYYY = num2str(year);
 DDD = num2str(day_of_year);
 DDD = sprintf('%03s', DDD); % the format specifier %03s pads DDD with leading zeros to ensure it is at least 3 characters long
 
 YY = YYYY(3:4);
-filename = ['brdc',DDD,'0.',YY,'n.Z'];
-RinexFile = [datadir,YYYY,'/',DDD,'/',YY,'n/',filename];
-[~,ephfile] = fileparts(RinexFile);
+ephfile = ['brdc',DDD,'0.',YY,'n'];
+RinexFileURL = ['https://cddis.nasa.gov/archive/gnss/data/daily/',YYYY,'/',DDD,'/',YY,'n/',ephfile,'.Z'];
+
 if ~exist(ephfile,'file')
     if ~exist([ephfile,'.Z'],'file')
         username = input('Write the username: ', 's');
         password = input('Write the password: ', 's');
 
-        system(['wget --auth-no-challenge --user=', username ' --password=', password, ' -O ', filename,' ', RinexFile])
-        
-        gunzip(RinexFile,pwd)
+        status = system(['wget --auth-no-challenge --user=', username ' --password=', password, ' -O ', ephfile, '.Z ', RinexFileURL]);
+        if status ~= 0
+            error(['It was not possible to download the file automatically. It occurred because either `wget`' ...
+                   'is not a recognized command on your system, the username/password is incorrect, or the URL' ...
+                   'link is broken. Please download this file manually and rerun this script.']);
+        end
     end
     fprintf('Unzipping ephemeris file %s \n',ephfile)
-    fprintf(['Some Matlab versions do not recognize .zip compression.' ...
-    ' If error occurred, please go to the folder and manually uncompress the .Z ephemeris file.']);
-    system(['uncompress ',ephfile,'.Z']);
-    fprintf('Using ephemeris file %s \n',ephfile)
-    %Matlab R2015a does not recognize .zip compression => manual uncompress nessary!!
-else
-    fprintf('Using ephemeris file %s \n',ephfile)
+    status = system(['uncompress ',ephfile,'.Z']);
+    if status ~= 0
+        error(['Some Matlab versions do not recognize .zip compression.' ...
+               ' If this error occurred, please go to the folder and manually uncompress the .Z ephemeris file.'])
+    end
 end
+fprintf('Using ephemeris file %s \n',ephfile)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [eph,~] =rinexe(ephfile); %Extract 21XN ephemeris files
