@@ -31,7 +31,7 @@ if ~exist(ephfile,'file')
         end
     end
     fprintf('Unzipping ephemeris file %s \n',ephfile)
-    system(['uncompress ',ephfile,'.Z']);
+    status = system(['uncompress ',ephfile,'.Z']);
     if status ~= 0
         error(['Some Matlab versions do not recognize .zip compression.' ...
                ' If this error occurred, please go to the folder and manually uncompress the .Z ephemeris file.'])
